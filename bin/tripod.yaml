@@ -1,0 +1,14 @@
+name: tripod
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.9
+  - pandas=1.5.3
+  - nextflow=22.10.6
+  - multiqc=1.21
+  - EMBOSS=6.6.0
+  - quast=5.2.0
+  - shovill=1.1.0
+  - biopython=1.84
