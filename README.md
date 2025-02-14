@@ -2,6 +2,28 @@
 
 The purpose of this repository is to serve as a nice template to align with the values in DFWED.
 
+## Installation
+
+To set up the required Conda environment, install it using the `tripod.yaml` file located in the `/bin` folder:
+
+```sh
+conda env create -f bin/tripod.yaml
+```
+
+## Running the Pipeline
+
+The pipeline can be executed using Nextflow with the following command:
+
+```sh
+nextflow run tripod.nf \
+  --wgs_reads <folder containing paired-end fastq.gz files> \
+  --primers <text file with primers for primersearch, e.g., 'Salmonella-reformatted-primers-list-psearch.txt'> \
+  --hmas_indir <folder containing output from the HMAS step_mothur run> \
+  --outdir <output folder> \
+  --multiqc_config <MultiQC configuration file, e.g., 'multiqc_config.yaml'> \
+  --mapping <CSV file mapping sample names to all possible isolates in the sample, e.g., 'MN_M05688_240618-422066253_sample_isolates_mapping.csv'>
+```
+
 ## Notices
 
 ### Public Domain Notice
@@ -37,4 +59,4 @@ CDC including this GitHub page may be subject to applicable federal law, includi
 ### Records Management Notice
 This repository is not a source of government records, but is a copy to increase
 collaboration and collaborative potential. All government records will be
-published through the [CDC web site](http://www.cdc.gov). 
+published through the [CDC web site](http://www.cdc.gov).

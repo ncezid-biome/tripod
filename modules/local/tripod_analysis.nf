@@ -1,10 +1,13 @@
 process tripod_analysis {
     publishDir "${params.final_outdir}", mode: 'copy'
-    tag "tripod_analysis"
+    tag "tripod_analysis: ${tag_name}"
     // debug true
 
     input:
     path(fasta)
+    path(indir)
+    path(mapping)
+    val(tag_name)
 
     output:
     path ("*.csv"), emit: report, optional:true
@@ -17,10 +20,11 @@ process tripod_analysis {
     # comment here
     cat !{fasta} >> reference.fasta
     run_tripod_analysis.py \
-        -i !{params.hmas_indir} \
+        -i !{indir} \
         -r reference.fasta \
-        -p !{params.mapping} \
-        -o "tripod_!{params.file_extension}.csv"
+        -p !{mapping} \
+        -o "tripod_!{tag_name}_!{params.file_extension}.csv" \
+        -t !{tag_name}
 
     '''
 

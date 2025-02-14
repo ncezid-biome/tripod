@@ -17,6 +17,17 @@ report_header_info:
 #   vsearch: "2.14.1"
 #   pear: "0.9.6"
 
+section_comments:
+    primer_performance_1: "#####this is the list of primers that (**FAILED in both stool and isolate samples
+      **. A primer is considered 'failed' if it has read depth less than 10 from the majority of the samples. 
+      Here we used only 'good' samples with 30x mean read depth or larger). "
+    primer_performance_2: "#####this is the list of primers that (**FAILED in stool but PERFECT in isolate samples
+      **. A primer is considered 'perfect' if it has read depth larger than 10 from ALL of the samples. 
+      Here we used only 'good' samples with 30x mean read depth or larger). "
+    primer_performance_3: "#####this is the list of primers that (**PERFECT in both stool and isolate samples)
+      **. A primer is considered 'perfect' if it has read depth larger than 10 from ALL of the samples. 
+      Here we used only 'good' samples with 30x mean read depth or larger). "
+
 # section_comments:
 #   general_stats: "General stats summary table for the raw reads, displaying by default the percentage of duplicate reads, 
 #     average read length and total number of sequences in K. Average read length should be ~250bp, and a high (>90%)  
@@ -71,11 +82,11 @@ module_order:
   - quast
   - custom_content
 
-custom_plot_config:
-  tripod_analysis:
-    defaultsort:
-      - column: "col1"
-        direction: des
+# custom_plot_config:
+#   tripod_analysis:
+#     defaultsort:
+#       - column: "col1"
+#         direction: des
 
 # custom_table_header_config:
 #   general_stats_table:
@@ -91,13 +102,18 @@ custom_plot_config:
 #     avg_sequence_length: True
 #     percent_gc: False
 
+table_columns_visible:
+  col4_stool: False
+  col4_isolate: False
+  
+
 read_count_multiplier: 0.001
 read_count_prefix: "K"
 read_count_desc: "thousands"
 
 
 table_cond_formatting_rules:
-  col1:
+  col1_stool:
     fail:
       - gt: 240
     warn:
@@ -124,6 +140,69 @@ table_cond_formatting_rules:
   #     - lt: 49.99
   #   pass:
   #     - gt: 49.99
+  col5_stool:
+    fail:
+      - lt: 30
+      - s_contains: "n/a"
+    warn:
+      - lt: 49.99
+    pass:
+      - gt: 49.99
+  col6_stool:
+    fail:
+      - lt: 0.8
+      - s_contains: "n/a"
+    warn:
+      - lt: 0.8999
+    pass:
+      - lt: 0.9799
+    exe:
+      - gt: 0.9799
+  col1_isolate:
+    fail:
+      - gt: 240
+    warn:
+      - gt: 120
+    pass:
+      - lt: 120
+    exe:
+      - lt: 12
+# col2:
+#   fail:
+#     - lt: 0.8
+#     - s_contains: "n/a"
+#   warn:
+#     - lt: 0.8999
+#   pass:
+#     - lt: 0.9799
+#   exe:
+#     - gt: 0.9799
+# p_col1:
+#   fail:
+#     - lt: 30
+#     - s_contains: "n/a"
+#   warn:
+#     - lt: 49.99
+#   pass:
+#     - gt: 49.99
+  col5_isolate:
+    fail:
+      - lt: 30
+      - s_contains: "n/a"
+    warn:
+      - lt: 49.99
+    pass:
+      - gt: 49.99
+  col6_isolate:
+    fail:
+      - lt: 0.8
+      - s_contains: "n/a"
+    warn:
+      - lt: 0.8999
+    pass:
+      - lt: 0.9799
+    exe:
+      - gt: 0.9799
 
 table_cond_formatting_colours:
   - exe: "#5bc0de"
@@ -132,10 +211,16 @@ table_cond_formatting_colours:
   - fail: "#d9534f"
 
 report_section_order:
-  tripod_analysis:
+  primer_performance_2:
     order: 10
-  quast_report:
+  primer_performance_1:
     order: 20
+  tripod_analysis_isolate:
+    order: 30
+  tripod_analysis_stool:
+    order: 40
+  # quast_report:
+  #   order: 20
 #   primer_report:
 #     order: 30
 #   denoise:

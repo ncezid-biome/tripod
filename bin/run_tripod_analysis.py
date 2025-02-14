@@ -12,7 +12,7 @@ import datetime
 import yaml
 import time
 
-def make_report_yaml(output_file, data_df):
+def make_report_yaml(output_file, data_df, tag_name):
     '''
     this method generates a custom content yaml file specific for the multiqc report
     this yaml file is for the final combined hmas summary report
@@ -21,33 +21,46 @@ def make_report_yaml(output_file, data_df):
     ----------
     output_file: output file (yaml) name
     data_df: data part of the yaml file in the format of dataframe
+    tag_name: a tag to differentiate stool and isolate reports
 
     Returns: None
     ----------
     '''   
     # Create headers dictionary
     headers = {
-        'col1': {
+        f'col1_{tag_name}': {
             'title': '# of FP',
             'description': 'number of False Positives',
             'format': '{:,.0f}',
             "scale": False
         },
-        'col2': {
+        f'col2_{tag_name}': {
             'title': '# of not ident seqs',
             'description': '# of not ident seqs',
             'format': '{:,.0f}',
             "scale": False
         },
-        'col3': {
+        f'col3_{tag_name}': {
             'title': '# of matched most abund. seqs',
             'description': '# of matched most abund. seqs',
             'format': '{:,.0f}',
             "scale": False
         },
-        'col4': {
+        f'col4_{tag_name}': {
             'title': '% of matched most abund. seqs',
             'description': '% of matched most abund. seqs',
+            'format': '{:,.3f}',
+            "scale": False
+        },
+        f'col5_{tag_name}': {
+            'title': 'Mean read depth',
+            'description': 'we include only reads with at least 2 sequence count',
+            'format': '{:,.1f}',
+            "scale": False
+        },
+        f'col6_{tag_name}': {
+            'title': '% of successful primer-pairs',
+            'description': 'primer pairs with at lease 2 amplicons in the sample',
             'format': '{:,.3f}',
             "scale": False
         },
@@ -58,8 +71,8 @@ def make_report_yaml(output_file, data_df):
 
     # Create the full YAML dictionary
     yaml_dict = {
-        'id': 'tripod_analysis',
-        'section_name': 'tripod report',
+        'id': f'tripod_analysis_{tag_name}',
+        'section_name': f'tripod report {tag_name}',
         'description': "Combined summary statistics for all the samples in the run, "
             "primer pairs (out of total 2461 in the Salmonella HMAS primer panel).",
         'plot_type': 'table',
@@ -102,10 +115,10 @@ def extract_highest_size_ids(fasta_file, patterns):
     
     return highest_size_ids
 
-def get_folders(args):
+def get_folders(parent_folder):
     
     # Get all folder names in the input folder
-    folder_names = [f for f in os.listdir(args.input) if os.path.isdir(os.path.join(args.input, f))]
+    folder_names = [f for f in os.listdir(parent_folder) if os.path.isdir(os.path.join(parent_folder, f))]
     
     return folder_names
 
@@ -143,12 +156,16 @@ def revcomp(myseq):
 
 def parse_argument():
     parser = argparse.ArgumentParser()
+    #HMAS step_mothur pipeline output folder
     parser.add_argument('-i', '--input', metavar = '', required = True, help = 'Specify input file folder')
-    parser.add_argument('-o', '--output', metavar = '', required = True, help = 'Specify the combined confusion_matrix file')
+    parser.add_argument('-o', '--output', metavar = '', required = True, help = 'Specify the tripod report output file')
+    #predicted amplicon fasta file (coming from amplicon extraction part, usually named as reference.fasta by default)
     parser.add_argument('-r', '--reference', metavar = '', required = True, help = 'reference_fasta file')
-    #parser.add_argument('-m', '--metasheet', metavar = '', required = True, help = 'metasheet file')
+    #look-up table between sample name and all possible WGS isolates in the sample
     parser.add_argument('-p', '--mapping', metavar = '', required = True, help = 'sample isolates mapping file')
-    #parser.add_argument('-s', '--script', metavar = '', required = True, help = 'python confusio_matrix script')
+    # currently, tag can be either 'stool' or 'isolate'
+    parser.add_argument('-t', '--tag', metavar = '', required = True, help = 'either stool or isolate')
+
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -165,7 +182,8 @@ if __name__ == "__main__":
     predict_amplicon_dict = SeqIO.to_dict(SeqIO.parse(args.reference, "fasta"))
     
     result_dict = {}
-    for folder_name in get_folders(args):
+    FP_dict = {} # key: sample name; value: FP primer list
+    for folder_name in get_folders(args.input):
         #skip those isolates without any valid unique sequences
         fasta_file = f'{args.input}/{folder_name}/{folder_name}.final.unique.fasta'
         if not os.path.exists(fasta_file) or os.path.getsize(fasta_file) <= 0:
@@ -182,6 +200,8 @@ if __name__ == "__main__":
         TP_counter = 0
         FP_counter = 0
         diff_counter = 0
+
+        FP_list = [] # list of false positive primers
         for primer, seq in highest_size_ids:
             seq_IDs = [] #hold all amplicon predictions for this primer-folder_name
             for isolate in sample_isolate_dict[folder_name]:
@@ -195,6 +215,7 @@ if __name__ == "__main__":
                     diff_counter += 1
             else:
                 FP_counter += 1
+                FP_list.append(primer)
             # for isolate in sample_isolate_dict[folder_name]:
             #     #seq_ID in predict_amplicon is in format: >OG0003724primerGroup6-CIMS-CO-088IH-ampl1
             #     seq_IDs = [key for key in predict_amplicon_dict if f'{primer}-{isolate}' in key]
@@ -208,6 +229,7 @@ if __name__ == "__main__":
             #     else:
             #         FP_counter += 1
         result_dict[folder_name] = (TP_counter, len(highest_size_ids), FP_counter, diff_counter)
+        FP_dict[folder_name] = FP_list # not currently using it 
 
         print(f'{folder_name}: {TP_counter} / {len(highest_size_ids)}')
         end = time.time()
@@ -225,9 +247,29 @@ if __name__ == "__main__":
     # Drop the original 'item1' and 'item2' columns
     # df = df[[f'# of matched most abund. seqs', f'% of matched most abund. seqs']]
     df.drop(columns=['item1', 'item2'], inplace=True)
+
+    ### add 2 new columns from HMAS2 report to tripod report
+    # 1. Look for a file that matches the pattern 'report*.csv'
+    for file in os.listdir(args.input):
+        if file.startswith('report') and file.endswith('.csv'):
+            report_file = os.path.join(args.input, file)
+            break
+
+    # 2: Read the CSV file and create DataFrame df_hmas
+    df_hmas = pd.read_csv(report_file, index_col=0)
+
+    # 3: Add 2 new columns from DataFrame df_hmas to current df
+    # Ensure both DataFrames share the same index type
+    common_index = df.index.intersection(df_hmas.index)
+
+    # 4: Select the 2 columns (mean read depth, %successful primers), based on shared indexes
+    df['mean read depth'] = df_hmas.loc[common_index].iloc[:, 0]
+    df['% successful primers'] = df_hmas.loc[common_index].iloc[:, 1]
+
     df.to_csv(final_filename)
     
-    df.columns = ['col1','col2','col3', 'col4']
-    make_report_yaml('tripod_mqc.yaml', df)
+    # df.columns = ['col1','col2','col3', 'col4']
+    df.columns = [f'col1_{args.tag}',f'col2_{args.tag}',f'col3_{args.tag}', f'col4_{args.tag}', f'col5_{args.tag}', f'col6_{args.tag}']
+    make_report_yaml(f'tripod_{args.tag}_mqc.yaml', df, args.tag)
 
 
