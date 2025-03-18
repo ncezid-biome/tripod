@@ -2,6 +2,12 @@
 
 The purpose of this repository is to serve as a nice template to align with the values in DFWED.
 
+## Overview
+ 
+The Tripod analysis pipeline processes a trio of datasets: HMAS stool data, HMAS isolate data, and their corresponding WGS reads. It compares HMAS run results between isolates and stool samples. Additionally, it evaluates primer performance across both HMAS stool and isolate datasets.  
+<p align="center"><img src="tripod_report_1.png" alt="tripod_report_1" width="500"></p>  
+<p align="center"><img src="tripod_report_2.png" alt="tripod_report_2" width="500"></p>
+
 ## Installation
 
 To set up the required Conda environment, install it using the `tripod.yaml` file located in the `/bin` folder:
@@ -21,7 +27,10 @@ nextflow run tripod.nf \
   --hmas_indir <folder containing output from the HMAS step_mothur run> \
   --outdir <output folder> \
   --multiqc_config <MultiQC configuration file, e.g., 'multiqc_config.yaml'> \
-  --mapping <CSV file mapping sample names to all possible isolates in the sample, e.g., 'MN_M05688_240618-422066253_sample_isolates_mapping.csv'>
+  --mapping <CSV file mapping sample names to all possible isolates in the sample, e.g., 'MN_M05688_240618-422066253_sample_isolates_mapping.csv'> \
+  --good_sample_list_stool <list of good sample names, see details in 'nextflow.config'>  
+
+all these params can be set in the 'nextflow.config' file and then you can conveniently run the pipeline as: 'nextflow run tripod.nf'  
 ```
 
 ## Notices

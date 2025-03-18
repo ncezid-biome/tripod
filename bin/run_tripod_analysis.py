@@ -190,10 +190,6 @@ if __name__ == "__main__":
             continue
 
         highest_size_ids = extract_highest_size_ids(fasta_file, oligo_primers.pseqs.keys())
-
-        # print("Highest size IDs for each pattern:")
-        # for pattern, seq_id in zip(oligo_primers.pseqs.keys(), highest_size_ids):
-        #     print(f"{seq_id[0]}: {seq_id[1]}")
         print (f'for: {folder_name}, we have {len(highest_size_ids)} most abundant seqs')
         start = time.time()
 
@@ -216,18 +212,7 @@ if __name__ == "__main__":
             else:
                 FP_counter += 1
                 FP_list.append(primer)
-            # for isolate in sample_isolate_dict[folder_name]:
-            #     #seq_ID in predict_amplicon is in format: >OG0003724primerGroup6-CIMS-CO-088IH-ampl1
-            #     seq_IDs = [key for key in predict_amplicon_dict if f'{primer}-{isolate}' in key]
-            #     if seq_IDs:
-            #         if any(seq == predict_amplicon_dict[seq_ID].seq \
-            #                 or revcomp(seq) == predict_amplicon_dict[seq_ID].seq for seq_ID in seq_IDs):
-            #                 TP_counter += 1
-            #                 break
-            #         else:
-            #             diff_counter += 1
-            #     else:
-            #         FP_counter += 1
+
         result_dict[folder_name] = (TP_counter, len(highest_size_ids), FP_counter, diff_counter)
         FP_dict[folder_name] = FP_list # not currently using it 
 

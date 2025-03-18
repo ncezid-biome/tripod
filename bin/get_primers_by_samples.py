@@ -7,8 +7,6 @@ import pandas as pd
 import utilities
 import settings
 import os
-# import matplotlib.pyplot as plt
-# import seaborn as sns
 import yaml
 
 
@@ -123,15 +121,7 @@ if __name__ == "__main__":
     
     args = parse_argument()
 
-    # timestamp = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-    # base_filename = args.output
-    # extension = os.path.splitext(base_filename)[1]
-    # final_filename = f"{os.path.splitext(base_filename)[0]}_{timestamp}{extension}"
-
     oligo_primers = utilities.Primers(settings.OLIGO_FILE)
-    # sample_isolate_dict = map_sample_to_isolate(args.mapping)
-    # predict_amplicon_dict = SeqIO.to_dict(SeqIO.parse(args.reference, "fasta"))
-    
 
     def get_primer_performance_df(input_folder, sample_list):
 
@@ -151,8 +141,6 @@ if __name__ == "__main__":
 
             result_dict[folder_name] = highest_size_ids
 
-        # print (f" -- we have {len(result_dict.keys())} columns -- sanity check...")
-        # print (f"And they're: {result_dict.keys()}")
         # Convert dictionary to DataFrame
         df = pd.DataFrame(result_dict, index=sorted(oligo_primers.pseqs.keys()))
         return df
@@ -160,8 +148,6 @@ if __name__ == "__main__":
 
     df_SH = get_primer_performance_df(args.stool, args.stool_samples)
     df_IH = get_primer_performance_df(args.isolate, args.isolate_samples)
-
-    # df.to_csv(args.output)
 
     # Step 1: Indexes where SH's average is smaller than IH's average
     SH_avg = df_SH.mean(axis=1)
@@ -174,16 +160,11 @@ if __name__ == "__main__":
 
     def get_avg_as_df(filtered_indexes):
 
-        # Calculate the average values for those filtered indexes in both SH and IH
-        # SH_filtered_avg = df_SH.loc[filtered_indexes].mean(axis=1)
-        # IH_filtered_avg = df_IH.loc[filtered_indexes].mean(axis=1)
-
         # Compute a tuple (min, median, max) for each row in df_SH and df_IH based on filtered indexes
-        # SH_filtered_stats = df_SH.loc[filtered_indexes].apply(lambda x: (x.min(), x.median(), x.max()), axis=1)
         SH_filtered_stats = df_SH.loc[filtered_indexes].apply(
             lambda x: f"min: {x.min()}, median: {x.median()}, max: {x.max()}", axis=1
         )
-        # IH_filtered_stats = df_IH.loc[filtered_indexes].apply(lambda x: (x.min(), x.median(), x.max()), axis=1)
+
         IH_filtered_stats = df_IH.loc[filtered_indexes].apply(
             lambda x: f"min: {x.min()}, median: {x.median()}, max: {x.max()}", axis=1
         )
@@ -232,49 +213,3 @@ if __name__ == "__main__":
                      'primer_performance_3',
                      'stats for primers that are both perfect in stool and isolate HMAS samples',
                      'pcol3-1', 'pcol3-2')
-    
-    # print (f"\n\n\n\n\n")
-
-    # not very meaningful ?
-    # print (f"we have TOTAL **{len(smaller_avg_indexes)}** primers that performs poorly on average in SH than in IH")
-    # print (f"conversely, we have TOTAL *{len(smaller_avg_reverse_indexes)}* primers the other way around")
-    
-    # print (f"we have **{len(below_threshold_indexes)}** primers that's bad in both SH and IH")
-    # # print (f"And they're: {below_threshold_indexes}")
-    # print (get_avg_as_df(below_threshold_indexes))
-    # print (f"we have **{len(above_threshold_indexes)}** primers that's bad in SH BUT good with IH")
-    # # print (f"And they're: {above_threshold_indexes}")
-    # print (get_avg_as_df(above_threshold_indexes))
-
-
-    # plt.figure(figsize=(10, 10))
-
-    # plt.subplot(2, 1, 1)
-    # sns.boxplot(data=df_SH)
-    # # sns.violinplot(data=df_SH)
-    # plt.title('Box Plot of Column Values in DataFrame SH')
-    # plt.xlabel('Columns')
-    # plt.ylabel('Values')
-    # # plt.xticks(rotation=45)  # Rotate column labels for better readability
-    # # Modify the xticks to show only the last 10 characters of the column names
-    # plt.xticks(ticks=range(len(df_SH.columns)), labels=[col[-10:] for col in df_SH.columns], rotation=45)
-    # # plt.show()
-
-    # # plt.figure(figsize=(10, 6))
-    # plt.subplot(2, 1, 2)
-    # sns.boxplot(data=df_IH)
-    # # sns.violinplot(data=df_IH)
-    # plt.title('Box Plot of Column Values in DataFrame IH')
-    # plt.xlabel('Columns')
-    # plt.ylabel('Values')
-    # # plt.xticks(rotation=45)  # Rotate column labels for better readability
-    # # Modify the xticks to show only the last 10 characters of the column names
-    # plt.xticks(ticks=range(len(df_IH.columns)), labels=[col[-10:] for col in df_IH.columns], rotation=45)
-
-    # # Adjust layout to avoid overlap
-    # plt.tight_layout()
-    # plt.savefig('boxplot.pdf', dpi=600)
-
-    # # plt.show()
-
-

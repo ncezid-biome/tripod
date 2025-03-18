@@ -7,9 +7,7 @@ process parse_primersearch {
     tuple val(sample), path(ps_file), path(fasta)
 
     output:
-    // tuple val(sample), path ("**/*_extractedAmplicons.fasta"), emit: fasta, optional:true
     path ("**/*_extractedAmplicons.fasta"), emit: fasta, optional:true
-    // tuple val(sample), path ("**/*"), emit: all_file, optional:true  there are other parsed primersearch files as well
 
     shell:
     '''

@@ -77,31 +77,10 @@ log_handler.setLevel(logging.INFO)
 
 logger = logging.getLogger('root')
 logger.setLevel(logging.INFO)
-logger.addHandler(log_handler)
-
-
-# def runPrimerSearch(seq_file, primer_file, output_file):
-#     '''
-#     check if primersearch is on path first, then run primersearch on the given sequence file and primer list file
-#     return the valid primersearch output file, otherwise return None if the command was not run successfully
-#     '''
-    
-#     if shutil.which('primersearch') is None:
-#         logger.error(f"primersearch is not found on PATH")
-#         sys.exit()
-        
-#     primersearch_path = '/scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/T3Pio_Data/library_versions_t3pio/EMBOSS-6.4.0/emboss/primersearch'
-#     command = [primersearch_path,'-seqall',seq_file,'-infile',primer_file,
-#     # command = ['primersearch','-seqall',seq_file,'-infile',primer_file,
-#                '-mismatchpercent',f'{mismatch_percent}','-outfile',output_file]
-#     process = subprocess.run(command, capture_output=True, text=True)
-#     if process.returncode == 0:
-#         return(output_file)
-    
+logger.addHandler(log_handler) 
 
 def extractIndex(hit_line_string):
     '''Extract and return hit position from Emboss primersearch forward or reverse strand hit line.'''
-    # regex = re.compile("strand\\ at\\ [\\[]{0,}[0-9]{1,}[\\]]{0,}\\ with")
     regex = re.compile(r"strand\s+at\s+([0-9]{1,})\s+with")
     clean_str = hit_line_string.replace('[', '').replace(']', '')
     matchArray = regex.findall(clean_str)
@@ -168,15 +147,11 @@ def parsePrimerSearch(primersearch_results, full_length_dict, file_base):
                         
                         full_length_record = full_length_dict[seq_id]  # created SeqRecord from amplicon and add to list
                         extracted_sequence = full_length_record.seq[startIndex:endIndex]
-                        # ampliconRec = SeqRecord(extracted_sequence, id=f'{primer_name}-{seq_id}') 
-                        # ampliconRec = SeqRecord(extracted_sequence, id=f'{primer_name}-{file_base}'[:max_seqid_len])
                         ampliconRec = SeqRecord(extracted_sequence, id=f'{primer_name}-{file_base}-ampl{ampl_count}'[:max_seqid_len])
                         extracted_amplicon_list.append(ampliconRec)
                         
-                        # seqid_list.append(f'{primer_name}-{file_base}'[:max_seqid_len])
                         seqid_list.append(f'{primer_name}-{file_base}-ampl{ampl_count}'[:max_seqid_len])
                         seqid_primer_list.append(primer_name)
-                        # seqid_isolate_list.append(seq_id)
                         seqid_isolate_list.append(file_base)
                         
                         # make sure it's not empty list and we only do this once
@@ -204,7 +179,6 @@ def parse_argument():
     # 02/10/2023 -s now can also be a directory which holds all the assemblies files
     parser = argparse.ArgumentParser(prog = 'extract_amplicon_from_primersearch_output.py')
     parser.add_argument('-p', '--primersearch', metavar = '', required = True, help = 'Specify primersearch output')
-    # parser.add_argument('-p', '--primers', metavar = '', required = True, help = 'Specify primers list file')
     parser.add_argument('-s', '--sequence', metavar = '', required = True, help = 'Specify isolate sequence file')
     parser.add_argument("--metasheet", action="store_true", help="Enable creating metasheet table")
     return parser.parse_args()
@@ -213,28 +187,10 @@ def parse_argument():
 if __name__ == "__main__":
     
     args = parse_argument()
-    # fasta file of nucleotide sequences to parse
-    # 02/10/2023  it now can also a directory name
-    # fastaToParse = args.sequence  
-    # primerlist_file = args.primers
-    
-    # fasta_list = [] #list of all the sequence files to parse
-    # if os.path.isdir(fastaToParse):
-    #     #fasta_list.extend(list(glob.glob(f"{fastaToParse}/*.fasta")))
-    #     fasta_list.extend(glob.glob(f"{fastaToParse}/**/*.fasta", recursive=True))
-
-    # else:
-    #     fasta_list.append(fastaToParse)
-        
-    # def concurrent_work(fasta_file):
         
     output_dir = f"{Path.cwd()}/primersearch/"
     os.makedirs(output_dir, exist_ok=True)
     file_base = Path(args.sequence).stem # basename of the fasta file without .fasta extension
-    # primersearch_results = runPrimerSearch(fasta_file, primerlist_file, f"{output_dir}{file_base}.ps")
-    # if primersearch_results is None:
-    #     logger.error(f"primersearch does not generate any results ! exitting")
-    #     sys.exit()
         
     # read full-length fasta sequences into dict of SeqrRecords with key = record.id
     full_length_dict = SeqIO.to_dict(SeqIO.parse(args.sequence, "fasta"))
@@ -256,6 +212,3 @@ if __name__ == "__main__":
         df = pd.DataFrame(_3lists_for_df).T
         df.columns = metasheet_table_columns
         df.to_csv(f"{output_dir}{file_base}{metasheet_file_extension}", index=False)
-        
-    # with concurrent.futures.ProcessPoolExecutor(max_workers=max_worker_num) as executor:
-    #     results = executor.map(concurrent_work, fasta_list)

@@ -109,13 +109,4 @@ if __name__ == "__main__":
     
     #read each report csv file as a df
     file_list = [file for file in args.input.split()]
-        
-    # report_df = pd.concat(df_list)
-
-
-    # # now generate report yaml file for MultiQC report
-    # # change column name
-    # report_df.columns = ['col1','col2','col3']
-    # #update empty cell to n/a
-    # report_df.fillna('n/a', inplace=True)
     make_quast_yaml(file_list, args.output)
