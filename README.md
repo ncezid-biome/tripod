@@ -1,37 +1,138 @@
-# template
 
-The purpose of this repository is to serve as a nice template to align with the values in DFWED.
+---
 
-## Overview
- 
-The Tripod analysis pipeline processes a trio of datasets: HMAS stool data, HMAS isolate data, and their corresponding WGS reads. It compares HMAS run results between isolates and stool samples. Additionally, it evaluates primer performance across both HMAS stool and isolate datasets.  
+# Tripod Analysis Pipeline
+
+The **Tripod analysis pipeline** processes:
+
+* **HMAS stool data (SH)**
+* **HMAS isolate data (IH)**
+* **Optional: corresponding isolate WGS reads (IW)**
+
+It compares HMAS results between isolate and stool samples and evaluates primer performance across datasets.
+
+The pipeline supports two modes:
+
+1. **Trio mode**
+   Stool HMAS + Isolate HMAS + Isolate WGS reads
+
+2. **Pair mode**
+   Stool HMAS + Isolate HMAS only (WGS optional)
+
 <p align="center"><img src="tripod_report_1.png" alt="tripod_report_1" width="500"></p>  
 <p align="center"><img src="tripod_report_2.png" alt="tripod_report_2" width="500"></p>
 
+---
+
 ## Installation
 
-To set up the required Conda environment, install it using the `tripod.yaml` file located in the `/bin` folder:
+Create the Conda environment:
 
-```sh
+```bash
 conda env create -f bin/tripod.yaml
 ```
 
+---
+
 ## Running the Pipeline
 
-The pipeline can be executed using Nextflow with the following command:
-
-```sh
-nextflow run tripod.nf \
+```bash
+nextflow run main.nf \
   --wgs_reads <folder containing paired-end fastq.gz files> \
-  --primers <text file with primers for primersearch, e.g., 'Salmonella-reformatted-primers-list-psearch.txt'> \
-  --hmas_indir <folder containing output from the HMAS step_mothur run> \
-  --outdir <output folder> \
-  --multiqc_config <MultiQC configuration file, e.g., 'multiqc_config.yaml'> \
-  --mapping <CSV file mapping sample names to all possible isolates in the sample, e.g., 'MN_M05688_240618-422066253_sample_isolates_mapping.csv'> \
-  --good_sample_list_stool <list of good sample names, see details in 'nextflow.config'>  
-
-all these params can be set in the 'nextflow.config' file and then you can conveniently run the pipeline as: 'nextflow run tripod.nf'  
+  --hmas_indir_stool <folder containing stool HMAS step_mothur output> \
+  --hmas_indir_isolate <folder containing isolate HMAS step_mothur output> \
+  --primers <primer file for primersearch> \
+  --mapping <3-column CSV mapping file> \
+  --multiqc_config <MultiQC configuration file> \
+  --outdir <output folder>
 ```
+
+All parameters may alternatively be defined in `nextflow.config`.
+
+---
+
+## Input Requirements
+
+### 1. Directory Structure
+
+The three input directories:
+
+* `--wgs_reads`
+* `--hmas_indir_stool`
+* `--hmas_indir_isolate`
+
+may be **parent directories**.
+
+The pipeline recursively searches subdirectories and matches files by sample names defined in the mapping file.
+
+---
+
+### 2. Mapping File Format (Required)
+
+The mapping file must be a **3-column CSV**.
+
+**Column order is mandatory.**
+
+| Isolate (IH)   | Stool (SH)     | Isolate WGS (IW) |
+| -------------- | -------------- | ---------------- |
+| CIMS-OH-006-IH | CIMS-OH-200-SH | CIMS-OH-006-IH   |
+| CIMS-OH-627-IH | CIMS-OH-627-SH | CIMS-OH-627-IH   |
+
+Notes:
+
+* In pair mode, WGS files may be absent.
+* Matching is strictly name-based.
+
+---
+
+## WGS-Optional Behavior
+
+If a WGS file is missing, the pipeline completes successfully.
+
+The following metrics are set to **0**:
+
+#### In `tripod_report_combined`:
+
+* `# of ident seqs to insilico`  
+* `% of ident seqs to insilico`
+
+#### In `tripod_report_stool` and `tripod_report_isolate`:
+
+* `# of not ident seqs`
+* Numerator of `# of matched most abundant seqs`
+
+---
+
+## Primer Performance Reports
+
+Primer performance is calculated using **good samples**, defined as:
+
+> Samples with ≥ 90% primer success rate.
+
+Filtering behavior:
+
+| Dataset      | 90% Threshold Checked Automatically? |
+| ------------ | ------------------------------------ |
+| Stool HMAS   | Yes                                  |
+| Isolate HMAS | No (assumed to pass)                 |
+
+If primer success rate is important for isolate samples, filter them in the mapping file before running the pipeline.
+
+
+### similarly, in the Good Sample Output
+
+File:
+
+```
+combined_output_*_goodsamples.csv
+```
+
+* Stool HMAS samples → already filtered (≥90%)
+* Isolate HMAS samples → not validated for threshold
+
+---
+
+
 
 ## Notices
 

@@ -16,13 +16,13 @@ report_header_info:
 section_comments:
     primer_performance_1: "#####this is the list of primers that (**FAILED in both stool and isolate samples
       **. A primer is considered 'failed' if it has read depth less than 10 from the majority of the samples. 
-      Here we used only 'good' samples with 30x mean read depth or larger). "
+      Here we used only 'good' samples with at least 90% primer success rate). "
     primer_performance_2: "#####this is the list of primers that (**FAILED in stool but PERFECT in isolate samples
       **. A primer is considered 'perfect' if it has read depth larger than 10 from ALL of the samples. 
-      Here we used only 'good' samples with 30x mean read depth or larger). "
+      Here we used only 'good' samples with at least 90% primer success rate). "
     primer_performance_3: "#####this is the list of primers that (**PERFECT in both stool and isolate samples)
       **. A primer is considered 'perfect' if it has read depth larger than 10 from ALL of the samples. 
-      Here we used only 'good' samples with 30x mean read depth or larger). "
+      Here we used only 'good' samples with at least 90% primer success rate). "
 
 
 module_order:
@@ -40,15 +40,15 @@ read_count_desc: "thousands"
 
 
 table_cond_formatting_rules:
-  col1_stool:
-    fail:
-      - gt: 240
-    warn:
-      - gt: 120
-    pass:
-      - lt: 120
-    exe:
-      - lt: 12
+  # col1_stool:
+  #   fail:
+  #     - gt: 240
+  #   warn:
+  #     - gt: 120
+  #   pass:
+  #     - lt: 120
+  #   exe:
+  #     - lt: 12
   col5_stool:
     fail:
       - lt: 30
@@ -67,15 +67,15 @@ table_cond_formatting_rules:
       - lt: 0.9799
     exe:
       - gt: 0.9799
-  col1_isolate:
-    fail:
-      - gt: 240
-    warn:
-      - gt: 120
-    pass:
-      - lt: 120
-    exe:
-      - lt: 12
+  # col1_isolate:
+  #   fail:
+  #     - gt: 240
+  #   warn:
+  #     - gt: 120
+  #   pass:
+  #     - lt: 120
+  #   exe:
+  #     - lt: 12
   col5_isolate:
     fail:
       - lt: 30
@@ -94,6 +94,33 @@ table_cond_formatting_rules:
       - lt: 0.9799
     exe:
       - gt: 0.9799
+  # col1_combined:
+  #   fail:
+  #     - gt: 240
+  #   warn:
+  #     - gt: 120
+  #   pass:
+  #     - lt: 120
+  #   exe:
+  #     - lt: 12
+  col7_combined:
+    fail:
+      - lt: 30
+      - s_contains: "n/a"
+    warn:
+      - lt: 49.99
+    pass:
+      - gt: 49.99
+  col8_combined:
+    fail:
+      - lt: 0.8
+      - s_contains: "n/a"
+    warn:
+      - lt: 0.8999
+    pass:
+      - lt: 0.9799
+    exe:
+      - gt: 0.9799
 
 table_cond_formatting_colours:
   - exe: "#5bc0de"
@@ -102,11 +129,15 @@ table_cond_formatting_colours:
   - fail: "#d9534f"
 
 report_section_order:
-  primer_performance_2:
+  primer_performance_3:
     order: 10
-  primer_performance_1:
+  primer_performance_2:
     order: 20
-  tripod_analysis_isolate:
+  primer_performance_1:
     order: 30
-  tripod_analysis_stool:
+  tripod_analysis_isolate:
     order: 40
+  tripod_analysis_stool:
+    order: 50
+  tripod_analysis_combined:
+    order: 60

@@ -11,6 +11,7 @@ import os
 import datetime
 import yaml
 import time
+import glob
 
 def make_report_yaml(output_file, data_df, tag_name):
     '''
@@ -74,10 +75,11 @@ def make_report_yaml(output_file, data_df, tag_name):
         'id': f'tripod_analysis_{tag_name}',
         'section_name': f'tripod report {tag_name}',
         'description': "Combined summary statistics for all the samples in the run, "
-            "primer pairs (out of total 2461 in the Salmonella HMAS primer panel).",
+            "primer pairs (out of total 2461 in the Salmonella HMAS primer panel).<br>"
+            "**note, if not ident seqs and the numerator of next column are 0, it's likely we don't have the matching WGS**",
         'plot_type': 'table',
         'pconfig': {
-            'id': 'tripod_analysis',
+            'id': f'tripod_analysis_{tag_name}',
             'sort_rows': False
         },
         'headers': headers,
@@ -122,32 +124,6 @@ def get_folders(parent_folder):
     
     return folder_names
 
-def map_sample_to_isolate(map_file):
-    '''
-    this method reads mapping file (sample-to-isolate) in csv format and return a dictionary of it 
-    key: sample (String)
-    value: a list of corresponding isolates 
-    (the list has no None value in it, and it's ensured to be a non-empty list)
-    
-    Parameters
-    ----------
-    map_file: the path to the mapping csv file 
-
-    Returns a dictionary
-    
-    '''
-    if map_file:
-        df = pd.read_csv(map_file, index_col=0)
-        # convert dataframe to a dictionary, index being key, and row being value in the form of a list
-        map_dict = df.T.to_dict("list")
-        # remove nan from the list
-        for key in map_dict:
-            map_dict[key] = [item for item in map_dict[key] if not(pd.isnull(item))]
-        # remove keys which has empty value
-        # new_map_dict = {key:val for key,val in map_dict.items() if len(val) > 0}
-        # return new_map_dict 
-        return map_dict
-
 def revcomp(myseq):
     rc = {'A' : 'T', 'T' : 'A', 'G' : 'C', 'C' : 'G', 'U' : 'A', 'Y' : 'R', 'R' : 'Y', 'K':'M', 'M':'K','B':'V',\
             'D':'H', 'H':'D', 'V':'B', 'N':'N'}
@@ -161,10 +137,9 @@ def parse_argument():
     parser.add_argument('-o', '--output', metavar = '', required = True, help = 'Specify the tripod report output file')
     #predicted amplicon fasta file (coming from amplicon extraction part, usually named as reference.fasta by default)
     parser.add_argument('-r', '--reference', metavar = '', required = True, help = 'reference_fasta file')
-    #look-up table between sample name and all possible WGS isolates in the sample
-    parser.add_argument('-p', '--mapping', metavar = '', required = True, help = 'sample isolates mapping file')
     # currently, tag can be either 'stool' or 'isolate'
     parser.add_argument('-t', '--tag', metavar = '', required = True, help = 'either stool or isolate')
+    parser.add_argument('-c', '--correlate', metavar = '', required = True, help = 'Specify the 3-column look-up(stool/isolate/wgs) table')
 
     return parser.parse_args()
 
@@ -178,20 +153,40 @@ if __name__ == "__main__":
     final_filename = f"{os.path.splitext(base_filename)[0]}_{timestamp}{extension}"
 
     oligo_primers = utilities.Primers(settings.OLIGO_FILE)
-    sample_isolate_dict = map_sample_to_isolate(args.mapping)
     predict_amplicon_dict = SeqIO.to_dict(SeqIO.parse(args.reference, "fasta"))
+    
+    # Load the 3-column tripod look-up table and strip spaces from all entries
+    df = pd.read_csv(args.correlate)#, nrows=15)
+    # test purpose only
+    # df = pd.read_csv(args.correlate, skiprows=range(1, 11), nrows=40)
+    df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    # Build dictionary: key = 2nd column (stool hmas), value = (1st col -- isolate hmas, 3rd col -- wgs)
+    if args.tag == 'stool':
+        tripod_mapping = df.set_index(df.columns[1])[df.columns[2]].to_dict()
+    else: # it's isolate
+        tripod_mapping = df.set_index(df.columns[0])[df.columns[2]].to_dict()
+
     
     result_dict = {}
     FP_dict = {} # key: sample name; value: FP primer list
-    for folder_name in get_folders(args.input):
+    reports_hmas = [] # hold the hmas run report for each sample
+
+    for stool in tripod_mapping:
+
+        pattern = os.path.join(args.input, "*", f"{stool}*", f"{stool}*.final.unique.fasta")
+        matches = glob.glob(pattern)
+        if len(matches) <= 0:
+            continue
+        fasta_file = matches[0]
         #skip those isolates without any valid unique sequences
-        fasta_file = f'{args.input}/{folder_name}/{folder_name}.final.unique.fasta'
         if not os.path.exists(fasta_file) or os.path.getsize(fasta_file) <= 0:
             continue
 
+        # Replace extension ".final.unique.fasta" → ".csv"
+        csv_file = fasta_file.replace(".final.unique.fasta", ".csv")
+        reports_hmas.append(csv_file)
+
         highest_size_ids = extract_highest_size_ids(fasta_file, oligo_primers.pseqs.keys())
-        print (f'for: {folder_name}, we have {len(highest_size_ids)} most abundant seqs')
-        start = time.time()
 
         TP_counter = 0
         FP_counter = 0
@@ -199,26 +194,21 @@ if __name__ == "__main__":
 
         FP_list = [] # list of false positive primers
         for primer, seq in highest_size_ids:
-            seq_IDs = [] #hold all amplicon predictions for this primer-folder_name
-            for isolate in sample_isolate_dict[folder_name]:
-                seq_IDs.extend([key for key in predict_amplicon_dict if f'{primer}-{isolate}' in key])
+
+            seq_IDs = [key for key in predict_amplicon_dict if f'{primer}-{tripod_mapping[stool]}' in key]
+
             if seq_IDs:
                 if any(seq == predict_amplicon_dict[seq_ID].seq \
                     or revcomp(seq) == predict_amplicon_dict[seq_ID].seq for seq_ID in seq_IDs):
                     TP_counter += 1
-                    # break
                 else:
                     diff_counter += 1
             else:
                 FP_counter += 1
                 FP_list.append(primer)
 
-        result_dict[folder_name] = (TP_counter, len(highest_size_ids), FP_counter, diff_counter)
-        FP_dict[folder_name] = FP_list # not currently using it 
-
-        print(f'{folder_name}: {TP_counter} / {len(highest_size_ids)}')
-        end = time.time()
-        print (f"it takes {(end-start):.2f} seconds")
+        result_dict[stool] = (TP_counter, len(highest_size_ids), FP_counter, diff_counter)
+        FP_dict[stool] = FP_list # not currently using it 
 
     # Convert dictionary to DataFrame
     df = pd.DataFrame.from_dict(result_dict, orient='index', columns=['item1', 'item2', '# of FP', '# of not ident seqs'])
@@ -234,22 +224,48 @@ if __name__ == "__main__":
     df.drop(columns=['item1', 'item2'], inplace=True)
 
     ### add 2 new columns from HMAS2 report to tripod report
-    # 1. Look for a file that matches the pattern 'report*.csv'
-    for file in os.listdir(args.input):
-        if file.startswith('report') and file.endswith('.csv'):
-            report_file = os.path.join(args.input, file)
-            break
+    # 1. concat our hmas report.csv files for stool
+    # df_hmas = pd.concat([pd.read_csv(f, index_col=0) for f in reports_hmas])
 
-    # 2: Read the CSV file and create DataFrame df_hmas
-    df_hmas = pd.read_csv(report_file, index_col=0)
+    if reports_hmas:   # only proceed if list is non-empty
+        df_hmas = pd.concat([pd.read_csv(f, index_col=0) for f in reports_hmas])
+    else:
+        df_hmas = pd.DataFrame()  # create empty DataFrame if no files
 
-    # 3: Add 2 new columns from DataFrame df_hmas to current df
+    # necessary because df_index usually is in the shorter form
+    index_mapping = {
+        long_id: short_id
+        for short_id in df.index
+        for long_id in df_hmas.index
+        if long_id.startswith(short_id)
+    }
+
+    df_hmas = df_hmas.rename(index=index_mapping)
+
+    # 2: Add 2 new columns from DataFrame df_hmas to current df
     # Ensure both DataFrames share the same index type
     common_index = df.index.intersection(df_hmas.index)
 
-    # 4: Select the 2 columns (mean read depth, %successful primers), based on shared indexes
-    df['mean read depth'] = df_hmas.loc[common_index].iloc[:, 0]
-    df['% successful primers'] = df_hmas.loc[common_index].iloc[:, 1]
+    # print(df_hmas.index)
+    # print(df.index)
+    # print(common_index)
+    # print(df_hmas)
+    # if args.tag == 'isolate':
+    #     df.loc[common_index, 'mean read depth'] = df_hmas.loc[common_index].iloc[:, 30]
+
+    # # 3: Select the 2 columns (mean read depth, %successful primers), based on shared indexes
+    # df['mean read depth'] = df_hmas.loc[common_index].iloc[:, 0]
+    # df['% successful primers'] = df_hmas.loc[common_index].iloc[:, 1]
+
+    # Ensure the two columns exist, initialize with None
+    df['mean read depth'] = None
+    df['% successful primers'] = None
+
+    if not df_hmas.empty and df_hmas.shape[1] >= 2 and len(common_index) > 0:
+        df.loc[common_index, 'mean read depth'] = df_hmas.loc[common_index].iloc[:, 0]
+        df.loc[common_index, '% successful primers'] = df_hmas.loc[common_index].iloc[:, 1]
+    else:
+        print("Warning: df_hmas is empty or has insufficient columns / no shared indexes.")
 
     df.to_csv(final_filename)
     

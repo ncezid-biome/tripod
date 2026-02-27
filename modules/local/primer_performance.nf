@@ -18,7 +18,7 @@ process primer_performance {
     '''
     get_primers_by_samples.py \
         -i !{indir_isolate} \
-        -l !{indir_stool}\
+        -l !{indir_stool} \
         -is !{good_sample_list_isoalte}\
         -ls !{good_sample_list_stool}\
 

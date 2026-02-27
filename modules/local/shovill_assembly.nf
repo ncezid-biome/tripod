@@ -8,6 +8,7 @@ process shovill_assembly {
 
     output:
     tuple val(sample), path ("${sample}_assembled.fasta"), emit: fasta, optional:true
+    path ("*.fa"), emit: contigs_fa, optional:true
 
 
     shell:
@@ -18,7 +19,9 @@ process shovill_assembly {
     cp !{reads[1]} shovill/r2_!{sample}.fastq.gz
 
     shovill -R1 shovill/r1_!{sample}.fastq.gz -R2 shovill/r2_!{sample}.fastq.gz --outdir shovill --force --cpu 4 \
+             --trim ON > /dev/null 2>&1 \
             && mv shovill/contigs.fa !{sample}_assembled.fasta 
+
             
     rm -rf shovill/r1_!{sample}.fastq.gz shovill/r2_!{sample}.fastq.gz
 
