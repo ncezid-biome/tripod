@@ -1,6 +1,138 @@
-# template
 
-The purpose of this repository is to serve as a nice template to align with the values in DFWED.
+---
+
+# Tripod Analysis Pipeline
+
+The **Tripod analysis pipeline** processes:
+
+* **HMAS stool data (SH)**
+* **HMAS isolate data (IH)**
+* **Optional: corresponding isolate WGS reads (IW)**
+
+It compares HMAS results between isolate and stool samples and evaluates primer performance across datasets.
+
+The pipeline supports two modes:
+
+1. **Trio mode**
+   Stool HMAS + Isolate HMAS + Isolate WGS reads
+
+2. **Pair mode**
+   Stool HMAS + Isolate HMAS only (WGS optional)
+
+<p align="center"><img src="tripod_report_1.png" alt="tripod_report_1" width="500"></p>  
+<p align="center"><img src="tripod_report_2.png" alt="tripod_report_2" width="500"></p>
+
+---
+
+## Installation
+
+Create the Conda environment:
+
+```bash
+conda env create -f bin/tripod.yaml
+```
+
+---
+
+## Running the Pipeline
+
+```bash
+nextflow run main.nf \
+  --wgs_reads <folder containing paired-end fastq.gz files> \
+  --hmas_indir_stool <folder containing stool HMAS step_mothur output> \
+  --hmas_indir_isolate <folder containing isolate HMAS step_mothur output> \
+  --primers <primer file for primersearch> \
+  --mapping <3-column CSV mapping file> \
+  --multiqc_config <MultiQC configuration file> \
+  --outdir <output folder>
+```
+
+All parameters may alternatively be defined in `nextflow.config`.
+
+---
+
+## Input Requirements
+
+### 1. Directory Structure
+
+The three input directories:
+
+* `--wgs_reads`
+* `--hmas_indir_stool`
+* `--hmas_indir_isolate`
+
+may be **parent directories**.
+
+The pipeline recursively searches subdirectories and matches files by sample names defined in the mapping file.
+
+---
+
+### 2. Mapping File Format (Required)
+
+The mapping file must be a **3-column CSV**.
+
+**Column order is mandatory.**
+
+| Isolate (IH)   | Stool (SH)     | Isolate WGS (IW) |
+| -------------- | -------------- | ---------------- |
+| CIMS-OH-006-IH | CIMS-OH-200-SH | CIMS-OH-006-IH   |
+| CIMS-OH-627-IH | CIMS-OH-627-SH | CIMS-OH-627-IH   |
+
+Notes:
+
+* In pair mode, WGS files may be absent.
+* Matching is strictly name-based.
+
+---
+
+## WGS-Optional Behavior
+
+If a WGS file is missing, the pipeline completes successfully.
+
+The following metrics are set to **0**:
+
+#### In `tripod_report_combined`:
+
+* `# of ident seqs to insilico`  
+* `% of ident seqs to insilico`
+
+#### In `tripod_report_stool` and `tripod_report_isolate`:
+
+* `# of not ident seqs`
+* Numerator of `# of matched most abundant seqs`
+
+---
+
+## Primer Performance Reports
+
+Primer performance is calculated using **good samples**, defined as:
+
+> Samples with ≥ 90% primer success rate.
+
+Filtering behavior:
+
+| Dataset      | 90% Threshold Checked Automatically? |
+| ------------ | ------------------------------------ |
+| Stool HMAS   | Yes                                  |
+| Isolate HMAS | No (assumed to pass)                 |
+
+If primer success rate is important for isolate samples, filter them in the mapping file before running the pipeline.
+
+
+### similarly, in the Good Sample Output
+
+File:
+
+```
+combined_output_*_goodsamples.csv
+```
+
+* Stool HMAS samples → already filtered (≥90%)
+* Isolate HMAS samples → not validated for threshold
+
+---
+
+
 
 ## Notices
 
@@ -37,4 +169,4 @@ CDC including this GitHub page may be subject to applicable federal law, includi
 ### Records Management Notice
 This repository is not a source of government records, but is a copy to increase
 collaboration and collaborative potential. All government records will be
-published through the [CDC web site](http://www.cdc.gov). 
+published through the [CDC web site](http://www.cdc.gov).

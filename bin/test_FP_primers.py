@@ -1,0 +1,64 @@
+# Total 112 FP primers (primer in at least 39 (>38) out of 46 ISOLATE samples)
+list1 = [('OG0001124primerGroup6', 44), ('OG0002993primerGroup0', 43), ('OG0000406primerGroup1', 43), ('OG0002066primerGroup7', 43), ('OG0002615primerGroup4', 39), ('OG0003163primerGroup9', 43), ('OG0002423primerGroup4', 43), ('OG0002892primerGroup0', 43), ('OG0001427primerGroup5', 43), ('OG0001618primerGroup0', 43), ('OG0002038primerGroup9', 43), ('OG0003002primerGroup7', 42), ('OG0002026primerGroup8', 43), ('OG0003239primerGroup0', 43), ('OG0002044primerGroup3', 43), ('OG0001451primerGroup1', 43), ('OG0003306primerGroup7', 43), ('OG0001930primerGroup5', 43), ('OG0001068primerGroup0', 43), ('OG0002455primerGroup9', 43), ('OG0001760primerGroup0', 43), ('OG0003061primerGroup0', 43), ('OG0002499primerGroup1', 43), ('OG0002151primerGroup2', 43), ('OG0001826primerGroup1', 43), ('OG0003241primerGroup6', 43), ('OG0001799primerGroup3', 43), ('OG0002158primerGroup7', 43), ('OG0001969primerGroup0', 43), ('OG0000952primerGroup9', 43), ('OG0001609primerGroup4', 43), ('OG0001135primerGroup1', 43), ('OG0001886primerGroup9', 41), ('OG0003044primerGroup0', 43), ('OG0000402primerGroup1', 43), ('OG0002165primerGroup7', 43), ('OG0002264primerGroup7', 43), ('OG0002693primerGroup6', 43), ('OG0000371primerGroup4', 43), ('OG0002692primerGroup6', 43), ('OG0002655primerGroup0', 43), ('OG0001755primerGroup8', 43), ('OG0002607primerGroup5', 43), ('OG0001502primerGroup4', 43), ('OG0002632primerGroup0', 43), ('OG0002287primerGroup1', 43), ('OG0001467primerGroup3', 43), ('OG0002102primerGroup5', 43), ('OG0002069primerGroup0', 43), ('OG0002073primerGroup4', 43), ('OG0003291primerGroup0', 43), ('OG0002901primerGroup2', 43), ('OG0001679primerGroup1', 43), ('OG0001567primerGroup3', 43), ('OG0001534primerGroup4', 43), ('OG0002265primerGroup9', 43), ('OG0002005primerGroup9', 43), ('OG0003206primerGroup0', 43), ('OG0001508primerGroup5', 43), ('OG0003034primerGroup6', 43), ('OG0000372primerGroup9', 43), ('OG0003607primerGroup7', 43), ('OG0001867primerGroup5', 43), ('OG0001085primerGroup3', 43), ('OG0001069primerGroup2', 43), ('OG0002242primerGroup2', 43), ('OG0002017primerGroup3', 43), ('OG0003508primerGroup0', 43), ('OG0002137primerGroup3', 43), ('OG0002487primerGroup5', 43), ('OG0001471primerGroup2', 43), ('OG0002354primerGroup3', 43), ('OG0002900primerGroup2', 43), ('OG0002384primerGroup2', 43), ('OG0002244primerGroup0', 43), ('OG0002430primerGroup5', 43), ('OG0001646primerGroup1', 43), ('OG0003281primerGroup0', 43), ('OG0001980primerGroup0', 43), ('OG0000385primerGroup0', 43), ('OG0003531primerGroup7', 43), ('OG0002403primerGroup2', 43), ('OG0001726primerGroup2', 40), ('OG0002513primerGroup0', 43), ('OG0002274primerGroup3', 43), ('OG0001148primerGroup6', 43), ('OG0001388primerGroup8', 43), ('OG0002545primerGroup2', 43), ('OG0002055primerGroup0', 43), ('OG0001027primerGroup9', 43), ('OG0003735primerGroup0', 43), ('OG0000513primerGroup8', 43), ('OG0002459primerGroup1', 43), ('OG0001458primerGroup4', 43), ('OG0002169primerGroup2', 43), ('OG0003486primerGroup1', 43), ('OG0002039primerGroup5', 43), ('OG0003529primerGroup9', 43), ('OG0001465primerGroup3', 43), ('OG0003056primerGroup1', 42), ('OG0002903primerGroup5', 43), ('OG0002174primerGroup5', 43), ('OG0003540primerGroup4', 43), ('OG0001776primerGroup6', 43), ('OG0002539primerGroup2', 43), ('OG0000553primerGroup0', 43), ('OG0003560primerGroup3', 43), ('OG0002500primerGroup6', 43), ('OG0000294primerGroup8', 43), ('OG0002394primerGroup9', 43), ('OG0002293primerGroup9', 42), ('OG0002476primerGroup4', 42)]
+
+# Total 89 FP primers (primer in at least 24 (>23) out of 47 STOOL samples)
+list2 = [('OG0002901primerGroup2', 33), ('OG0001085primerGroup3', 32), ('OG0003531primerGroup7', 30), ('OG0000294primerGroup8', 42), ('OG0002892primerGroup0', 27), ('OG0002274primerGroup3', 27), ('OG0000513primerGroup8', 29), ('OG0002993primerGroup0', 26), ('OG0002423primerGroup4', 28), ('OG0001427primerGroup5', 29), ('OG0001618primerGroup0', 30), ('OG0003002primerGroup7', 28), ('OG0002026primerGroup8', 27), ('OG0003306primerGroup7', 31), ('OG0001930primerGroup5', 29), ('OG0001068primerGroup0', 28), ('OG0002499primerGroup1', 28), ('OG0001826primerGroup1', 28), ('OG0000952primerGroup9', 27), ('OG0002165primerGroup7', 27), ('OG0002693primerGroup6', 30), ('OG0000371primerGroup4', 32), ('OG0002692primerGroup6', 27), ('OG0002655primerGroup0', 30), ('OG0002632primerGroup0', 29), ('OG0002287primerGroup1', 30), ('OG0002102primerGroup5', 31), ('OG0002073primerGroup4', 28), ('OG0002265primerGroup9', 27), ('OG0003206primerGroup0', 31), ('OG0001508primerGroup5', 32), ('OG0001069primerGroup2', 30), ('OG0002242primerGroup2', 24), ('OG0002017primerGroup3', 26), ('OG0003508primerGroup0', 28), ('OG0002137primerGroup3', 25), ('OG0001471primerGroup2', 26), ('OG0002354primerGroup3', 32), ('OG0002900primerGroup2', 29), ('OG0002384primerGroup2', 30), ('OG0002244primerGroup0', 30), ('OG0002430primerGroup5', 27), ('OG0001148primerGroup6', 32), ('OG0001388primerGroup8', 34), ('OG0002055primerGroup0', 30), ('OG0001027primerGroup9', 31), ('OG0003735primerGroup0', 30), ('OG0002039primerGroup5', 26), ('OG0003529primerGroup9', 28), ('OG0001465primerGroup3', 28), ('OG0003540primerGroup4', 27), ('OG0003291primerGroup0', 26), ('OG0001760primerGroup0', 26), ('OG0001980primerGroup0', 30), ('OG0002513primerGroup0', 28), ('OG0002903primerGroup5', 29), ('OG0001451primerGroup1', 24), ('OG0002455primerGroup9', 30), ('OG0003241primerGroup6', 29), ('OG0002264primerGroup7', 25), ('OG0000372primerGroup9', 30), ('OG0003607primerGroup7', 27), ('OG0003281primerGroup0', 29), ('OG0002403primerGroup2', 26), ('OG0001124primerGroup6', 25), ('OG0002459primerGroup1', 24), ('OG0002066primerGroup7', 27), ('OG0002038primerGroup9', 29), ('OG0002158primerGroup7', 28), ('OG0001755primerGroup8', 27), ('OG0002607primerGroup5', 26), ('OG0001679primerGroup1', 26), ('OG0002005primerGroup9', 25), ('OG0003034primerGroup6', 28), ('OG0002487primerGroup5', 26), ('OG0002545primerGroup2', 27), ('OG0001458primerGroup4', 27), ('OG0002169primerGroup2', 25), ('OG0001467primerGroup3', 25), ('OG0001776primerGroup6', 26), ('OG0002539primerGroup2', 26), ('OG0003560primerGroup3', 27), ('OG0002151primerGroup2', 27), ('OG0000553primerGroup0', 29), ('OG0001799primerGroup3', 25), ('OG0001646primerGroup1', 24), ('OG0003163primerGroup9', 24), ('OG0003486primerGroup1', 24), ('OG0002174primerGroup5', 24)]
+
+# Total 110 FP primers (primers in 14 out of 14 'good' STOOL samples)
+list3 = [('OG0002993primerGroup0', 14), ('OG0000406primerGroup1', 14), ('OG0002066primerGroup7', 14), ('OG0002615primerGroup4', 14), ('OG0003163primerGroup9', 14), ('OG0002423primerGroup4', 14), ('OG0002293primerGroup9', 14), ('OG0002892primerGroup0', 14), ('OG0001427primerGroup5', 14), ('OG0001618primerGroup0', 14), ('OG0002038primerGroup9', 14), ('OG0003002primerGroup7', 14), ('OG0002026primerGroup8', 14), ('OG0003239primerGroup0', 14), ('OG0002044primerGroup3', 14), ('OG0001451primerGroup1', 14), ('OG0003306primerGroup7', 14), ('OG0001930primerGroup5', 14), ('OG0001068primerGroup0', 14), ('OG0002455primerGroup9', 14), ('OG0001760primerGroup0', 14), ('OG0003061primerGroup0', 14), ('OG0002499primerGroup1', 14), ('OG0002151primerGroup2', 14), ('OG0001826primerGroup1', 14), ('OG0003241primerGroup6', 14), ('OG0001799primerGroup3', 14), ('OG0002158primerGroup7', 14), ('OG0001969primerGroup0', 14), ('OG0000952primerGroup9', 14), ('OG0001609primerGroup4', 14), ('OG0003044primerGroup0', 14), ('OG0000402primerGroup1', 14), ('OG0002165primerGroup7', 14), ('OG0002264primerGroup7', 14), ('OG0002693primerGroup6', 14), ('OG0000371primerGroup4', 14), ('OG0002692primerGroup6', 14), ('OG0002655primerGroup0', 14), ('OG0001755primerGroup8', 14), ('OG0002607primerGroup5', 14), ('OG0001502primerGroup4', 14), ('OG0002632primerGroup0', 14), ('OG0002287primerGroup1', 14), ('OG0001467primerGroup3', 14), ('OG0002102primerGroup5', 14), ('OG0002069primerGroup0', 14), ('OG0002073primerGroup4', 14), ('OG0003291primerGroup0', 14), ('OG0002901primerGroup2', 14), ('OG0001679primerGroup1', 14), ('OG0001567primerGroup3', 14), ('OG0001534primerGroup4', 14), ('OG0002265primerGroup9', 14), ('OG0002005primerGroup9', 14), ('OG0003206primerGroup0', 14), ('OG0001508primerGroup5', 14), ('OG0003034primerGroup6', 14), ('OG0000372primerGroup9', 14), ('OG0003607primerGroup7', 14), ('OG0001867primerGroup5', 14), ('OG0001085primerGroup3', 14), ('OG0001069primerGroup2', 14), ('OG0002242primerGroup2', 14), ('OG0002017primerGroup3', 14), ('OG0003508primerGroup0', 14), ('OG0002137primerGroup3', 14), ('OG0002487primerGroup5', 14), ('OG0001471primerGroup2', 14), ('OG0002354primerGroup3', 14), ('OG0002900primerGroup2', 14), ('OG0002384primerGroup2', 14), ('OG0002244primerGroup0', 14), ('OG0002430primerGroup5', 14), ('OG0001646primerGroup1', 14), ('OG0003281primerGroup0', 14), ('OG0001980primerGroup0', 14), ('OG0000385primerGroup0', 14), ('OG0003531primerGroup7', 14), ('OG0002403primerGroup2', 14), ('OG0001726primerGroup2', 14), ('OG0002513primerGroup0', 14), ('OG0002274primerGroup3', 14), ('OG0001148primerGroup6', 14), ('OG0002476primerGroup4', 14), ('OG0001388primerGroup8', 14), ('OG0002545primerGroup2', 14), ('OG0001124primerGroup6', 14), ('OG0002055primerGroup0', 14), ('OG0001027primerGroup9', 14), ('OG0003735primerGroup0', 14), ('OG0000513primerGroup8', 14), ('OG0002459primerGroup1', 14), ('OG0001458primerGroup4', 14), ('OG0002169primerGroup2', 14), ('OG0003486primerGroup1', 14), ('OG0002039primerGroup5', 14), ('OG0003529primerGroup9', 14), ('OG0001465primerGroup3', 14), ('OG0003056primerGroup1', 14), ('OG0002903primerGroup5', 14), ('OG0002174primerGroup5', 14), ('OG0003540primerGroup4', 14), ('OG0001776primerGroup6', 14), ('OG0002539primerGroup2', 14), ('OG0000553primerGroup0', 14), ('OG0003560primerGroup3', 14), ('OG0002500primerGroup6', 14), ('OG0000294primerGroup8', 14), ('OG0002394primerGroup9', 14)]
+
+#114 un-matched primers from t3pio after parse-primersearch
+#(112 of the 114 matches to the 112 FP primers in list1)
+un_matched_t3pio_file = '/scicomp/home-pure/qtl7/test/t3pio/primer_compare_result_30200_unmatched'
+un_matched_primer_list = []
+with open(un_matched_t3pio_file, 'r') as f:
+    for line in f:
+        un_matched_primer_list.append(line.strip())
+
+# 1. Sorting both lists by value (second element of each tuple)
+sorted_list1 = sorted(list1, key=lambda x: x[1], reverse=True)
+sorted_list2 = sorted(list2, key=lambda x: x[1], reverse=True)
+sorted_list3 = sorted(list3, key=lambda x: x[1], reverse=True)
+
+# 2. Getting the intersection of primer groups
+primer_groups1 = set([item[0] for item in list1])
+primer_groups2 = set([item[0] for item in list2])
+primer_groups3 = set([item[0] for item in list3])
+
+print(f"have {len((primer_groups1.intersection(set(un_matched_primer_list))))} FP unmatched in common")
+
+# Intersection of primer groups from both lists
+intersection = primer_groups1.intersection(primer_groups2)
+intersection2 = primer_groups1.intersection(primer_groups3)
+
+# Get original elements from list1 and list2 that match the intersection
+original_elements_list1 = [item for item in sorted_list1 if item[0] in intersection2]
+original_elements_list3 = [item for item in sorted_list3 if item[0] in intersection2]
+
+# Display the original matching elements from both lists
+print("Matching elements in list1:", original_elements_list1)
+print("Matching elements in list3:", original_elements_list3)
+
+# Print sorted lists and intersection
+# print("Sorted List 1 (112 primers):", sorted_list1)
+# print("Sorted List 2 (89 primers):", sorted_list2)
+print(f"Have total {len(intersection2)} overlapped")
+print("Intersection of primer groups:", intersection2)
+
+'''
+The above data came frame running scripts below 
+set threshold to 38 for isolate HMAS, and 23 for stool HMAS
+python3 get_FP_primers_by_samples.py 
+    -i /scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/CIMS/HMAS_pilot/isolate_HMAS/MN_M05688_240618-422066253/MN_M05688_240618_v1.2.1_20240906_163532 
+    -o test 
+    -r /scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/CIMS/HMAS_pilot/tripod/dev/MN_M05688_240322_v1.0.0_20241007_104321/reference.fasta 
+    -p ../MN_M05688_240618-422066253_sample_isolates_IS_mapping.csv 
+    -t isolate
+
+python3 get_FP_primers_by_samples.py 
+    -i /scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/CIMS/HMAS_pilot/stool_HMAS/MN_M05688_240322-413314107/MN_M05688_240322-413314107_v1.2.1_20240908_131907 
+    -o test 
+    -r /scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/CIMS/HMAS_pilot/tripod/dev/MN_M05688_240322_v1.0.0_20241007_104321/reference.fasta 
+    -p ../MN_M05688_240618-422066253_sample_isolates_mapping.csv 
+    -t stool
+'''
