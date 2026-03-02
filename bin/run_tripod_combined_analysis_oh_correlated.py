@@ -322,8 +322,11 @@ if __name__ == "__main__":
     reports_isolate = [] # it's not being used for now
     for stool in tripod_mapping:
 
-        pattern = os.path.join(args.input, "*", f"{stool}*", f"{stool}*.final.unique.fasta")
-        matches = glob.glob(pattern)
+        # pattern = os.path.join(args.input, "*", f"{stool}*", f"{stool}*.final.unique.fasta")
+        # matches = glob.glob(pattern)
+        pattern = os.path.join(args.input, "**", f"{stool}*.final.unique.fasta")
+        matches = glob.glob(pattern, recursive=True)
+
         if len(matches) <= 0:
             continue
         fasta_file = matches[0]

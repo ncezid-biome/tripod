@@ -157,8 +157,7 @@ if __name__ == "__main__":
     
     # Load the 3-column tripod look-up table and strip spaces from all entries
     df = pd.read_csv(args.correlate)#, nrows=15)
-    # test purpose only
-    # df = pd.read_csv(args.correlate, skiprows=range(1, 11), nrows=40)
+
     df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     # Build dictionary: key = 2nd column (stool hmas), value = (1st col -- isolate hmas, 3rd col -- wgs)
     if args.tag == 'stool':
@@ -173,8 +172,11 @@ if __name__ == "__main__":
 
     for stool in tripod_mapping:
 
-        pattern = os.path.join(args.input, "*", f"{stool}*", f"{stool}*.final.unique.fasta")
-        matches = glob.glob(pattern)
+        # pattern = os.path.join(args.input, "*", f"{stool}*", f"{stool}*.final.unique.fasta")
+        # matches = glob.glob(pattern)
+        pattern = os.path.join(args.input, "**", f"{stool}*.final.unique.fasta")
+        matches = glob.glob(pattern, recursive=True)
+        
         if len(matches) <= 0:
             continue
         fasta_file = matches[0]
@@ -223,10 +225,6 @@ if __name__ == "__main__":
     # df = df[[f'# of matched most abund. seqs', f'% of matched most abund. seqs']]
     df.drop(columns=['item1', 'item2'], inplace=True)
 
-    ### add 2 new columns from HMAS2 report to tripod report
-    # 1. concat our hmas report.csv files for stool
-    # df_hmas = pd.concat([pd.read_csv(f, index_col=0) for f in reports_hmas])
-
     if reports_hmas:   # only proceed if list is non-empty
         df_hmas = pd.concat([pd.read_csv(f, index_col=0) for f in reports_hmas])
     else:
@@ -246,17 +244,6 @@ if __name__ == "__main__":
     # Ensure both DataFrames share the same index type
     common_index = df.index.intersection(df_hmas.index)
 
-    # print(df_hmas.index)
-    # print(df.index)
-    # print(common_index)
-    # print(df_hmas)
-    # if args.tag == 'isolate':
-    #     df.loc[common_index, 'mean read depth'] = df_hmas.loc[common_index].iloc[:, 30]
-
-    # # 3: Select the 2 columns (mean read depth, %successful primers), based on shared indexes
-    # df['mean read depth'] = df_hmas.loc[common_index].iloc[:, 0]
-    # df['% successful primers'] = df_hmas.loc[common_index].iloc[:, 1]
-
     # Ensure the two columns exist, initialize with None
     df['mean read depth'] = None
     df['% successful primers'] = None
@@ -269,7 +256,6 @@ if __name__ == "__main__":
 
     df.to_csv(final_filename)
     
-    # df.columns = ['col1','col2','col3', 'col4']
     df.columns = [f'col1_{args.tag}',f'col2_{args.tag}',f'col3_{args.tag}', f'col4_{args.tag}', f'col5_{args.tag}', f'col6_{args.tag}']
     make_report_yaml(f'tripod_{args.tag}_mqc.yaml', df, args.tag)
 
