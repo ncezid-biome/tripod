@@ -12,6 +12,7 @@ process tripod_analysis {
     path ("*.csv"), emit: report, optional:true
     path ("*.fasta"), emit: fasta, optional:true
     path ("*.yaml"), emit: yaml, optional:true
+    path ("*.txt"), emit: text, optional:true
 
 
     shell:

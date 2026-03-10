@@ -12,6 +12,8 @@ import yaml
 import time
 import glob
 
+PCENT_PRIMER_SUCCESS = 0.9
+
 def make_report_yaml(output_file, data_df, tag_name):
     '''
     this method generates a custom content yaml file specific for the multiqc report
@@ -140,8 +142,6 @@ def make_primer_report_yaml(output_file, data_df, yaml_id, yaml_description, col
     else:
         data_yaml = data_df.to_dict(orient='index')
 
-    # Convert the DataFrame to the required format
-    # data_yaml = data_df.to_dict(orient='index')
 
     # Create the full YAML dictionary
     yaml_dict = {
@@ -232,9 +232,6 @@ def extract_highest_size_ids(fasta_file, patterns, return_type="seqs"):
     if return_type == "seqs":
         return [(pattern, pattern_dict[pattern][2]) 
                 for pattern in patterns if pattern_dict[pattern][0] is not None]
-    # elif return_type == "sizes":
-    #     return [pattern_dict[pattern][1] 
-    #             for pattern in patterns if pattern_dict[pattern][0] is not None]
     elif return_type == "sizes":
         # Always return one value per pattern, fill with 0 if missing
         return [pattern_dict[pattern][1] if pattern_dict[pattern][0] is not None else 0
@@ -322,15 +319,13 @@ if __name__ == "__main__":
     reports_isolate = [] # it's not being used for now
     for stool in tripod_mapping:
 
-        # pattern = os.path.join(args.input, "*", f"{stool}*", f"{stool}*.final.unique.fasta")
-        # matches = glob.glob(pattern)
         pattern = os.path.join(args.input, "**", f"{stool}*.final.unique.fasta")
         matches = glob.glob(pattern, recursive=True)
 
         if len(matches) <= 0:
             continue
         fasta_file = matches[0]
-        #skip those isolates without any valid unique sequences
+        #skip those samples without any valid unique sequences
         if not os.path.exists(fasta_file) or os.path.getsize(fasta_file) <= 0:
             continue
 
@@ -347,13 +342,16 @@ if __name__ == "__main__":
         if len(matches) <= 0:
             continue
         fasta_file_isolate = matches[0]
-
-        #make sure the isolate sample has valid sequences
+        #skip those samples without any valid unique sequences
+        if not os.path.exists(fasta_file_isolate) or os.path.getsize(fasta_file_isolate) <= 0:
+            continue
+        
+        # Replace extension ".final.unique.fasta" → ".csv"
+        csv_file_iso = fasta_file_isolate.replace(".final.unique.fasta", ".csv")
+        reports_isolate.append(csv_file_iso)
+        
         highest_size_ids_isolate = []
-        if os.path.exists(fasta_file_isolate) and os.path.getsize(fasta_file_isolate) > 0:
-            highest_size_ids_isolate = extract_highest_size_ids(fasta_file_isolate, oligo_primers.pseqs.keys())
-            csv_file = fasta_file_isolate.replace(".final.unique.fasta", ".csv")
-            reports_isolate.append(csv_file)
+        highest_size_ids_isolate = extract_highest_size_ids(fasta_file_isolate, oligo_primers.pseqs.keys())
 
         TP_counter = 0
         FP_counter = 0
@@ -410,7 +408,7 @@ if __name__ == "__main__":
     )
 
     # 2nd new column
-    df['# of matched to insilico'] = '(' + df['item1'].astype(str) + ')' 
+    df['# of matched to insilico'] = df['item1'].astype(str)
 
     # 3rd new column
     df['% of ident seqs to insilico'] = (df['item1'] / df['item2'] * 100).round(1).astype(str) + '%'
@@ -434,32 +432,114 @@ if __name__ == "__main__":
     }
 
     df_hmas = df_hmas.rename(index=index_mapping)
+    df_hmas = df_hmas[~df_hmas.index.duplicated(keep='first')]
 
     # 2: Add 2 new columns from DataFrame df_hmas to current df
-    # Ensure both DataFrames share the same index type
-    common_index = df.index.intersection(df_hmas.index)
     
-    # Ensure the two columns exist, initialize with None
-    df['mean read depth'] = None
-    df['% successful primers'] = None
+    if not df_hmas.empty and df_hmas.shape[1] >= 2:
 
-    if not df_hmas.empty and df_hmas.shape[1] >= 2 and len(common_index) > 0:
-        df.loc[common_index, 'mean read depth'] = df_hmas.loc[common_index].iloc[:, 0]
-        df.loc[common_index, '% successful primers'] = df_hmas.loc[common_index].iloc[:, 1]
+        stool_depth = df_hmas.iloc[:, 0]
+        stool_succ  = df_hmas.iloc[:, 1]
+
+        df['mean read depth'] = df.index.map(stool_depth)
+        df['% successful primers'] = df.index.map(stool_succ)
+
     else:
-        print("Warning: df_hmas is empty or has insufficient columns / no shared indexes.")
+        print("Warning: df_hmas is empty or has insufficient columns.")
+    
+        
+    #################################################
+    #################################################
+    ### add 2 new columns from HMAS2 report.csv files for isolates
+    if reports_isolate:
+        df_hmas_iso = pd.concat([pd.read_csv(f, index_col=0) for f in reports_isolate])
+    else:
+        df_hmas_iso = pd.DataFrame()
 
+    # Map long isolate report IDs to short isolate IDs (tripod_mapping[stool][0])
+    isolate_ids = [tripod_mapping[s][0] for s in df.index if s in tripod_mapping]
+
+    index_mapping_iso = {
+        long_id: short_id
+        for short_id in isolate_ids
+        for long_id in df_hmas_iso.index
+        if long_id.startswith(short_id)
+    }
+    df_hmas_iso = df_hmas_iso.rename(index=index_mapping_iso)
+    # Keep the first occurrence for each isolate id (or use keep='last')
+    df_hmas_iso = df_hmas_iso[~df_hmas_iso.index.duplicated(keep='first')]
+
+    # Add isolate columns
+    df['mean read depth (isolate)'] = None
+    df['% successful primers (isolate)'] = None
+
+    # Create a helper column mapping stool->isolate so we can join cleanly
+    df['__isolate_id'] = df.index.map(lambda s: tripod_mapping[s][0] if s in tripod_mapping else None)
+  
+    if not df_hmas_iso.empty and df_hmas_iso.shape[1] >= 2:
+
+        iso_depth = df_hmas_iso.iloc[:, 0]
+        iso_succ  = df_hmas_iso.iloc[:, 1]
+
+        df['mean read depth (isolate)'] = df['__isolate_id'].map(iso_depth)
+        df['% successful primers (isolate)'] = df['__isolate_id'].map(iso_succ)
+
+    else:
+        print("Warning: df_hmas_iso is empty or has insufficient columns.")
+    
+    
+    ############### end of newly added block #################
+    
     df.to_csv(final_filename)
+    
+    ########################################################
+    ########################################################
+    # Require both stool and isolate to pass
+    stool_pass = (df['% successful primers'] > PCENT_PRIMER_SUCCESS)
 
-    # filtered to save only good samples
-    df_filtered = df[df['% successful primers'] > 0.9].copy()
+    # isolate column might be None for some rows; treat as fail
+    iso_pass = (df['% successful primers (isolate)'].fillna(0) > PCENT_PRIMER_SUCCESS)
+    df_filtered = df[stool_pass & iso_pass].copy()
     good_stools = list(df_filtered.index)
-    avg_row = df_filtered.mean(numeric_only=True).round(1)
+    
+    # All stools from the mapping (from the very beginning)
+    all_mapped_stools = sorted(list(tripod_mapping.keys()))
+
+    # Stools that made it into the main results dataframe (were processed)
+    processed_stools = set(df.index)
+
+    # Stools that passed final filter
+    passed_stools = set(good_stools)
+
+    # Anything mapped but not passed is "filtered out" (including never-processed)
+    filtered_out_stools = [s for s in all_mapped_stools if s not in passed_stools]
+
+    filtered_out_file = f"{os.path.splitext(base_filename)[0]}_filtered_out_stools.txt"
+    with open(filtered_out_file, "w") as f:
+        for s in filtered_out_stools:
+
+            if s not in processed_stools:
+                # These were skipped earlier (no fasta, empty fasta, no isolate fasta, etc.)
+                f.write(f"{s}\tnot being processed, either the stool or isolates samples is missing in the input folder\n")
+            else:
+                sp = bool(stool_pass.loc[s]) if s in stool_pass.index else False
+                ip = bool(iso_pass.loc[s]) if s in iso_pass.index else False
+                f.write(f"{s}\tstool_pass={sp}\tisolate_pass={ip}\n")
+    
+    ############### end of newly added block #################
+    
+    avg_row = df_filtered.mean(numeric_only=True).round(2)
     avg_row.name = "Average"
     df_result = pd.concat([df_filtered, avg_row.to_frame().T])
 
+    # If you don't want __isolate_id in outputs:
+    df.drop(columns=['__isolate_id','% successful primers (isolate)','mean read depth (isolate)'], inplace=True, errors='ignore')
+    df_result.drop(columns=['__isolate_id','% successful primers (isolate)','mean read depth (isolate)'], inplace=True, errors='ignore')
+    
     final_filename_new = f"{os.path.splitext(base_filename)[0]}_goodsamples{extension}"
-    df_result.to_csv(final_filename_new)
+    df_result.to_csv(final_filename_new)    
+    
+    
     
     # df.columns = ['col1','col2','col3', 'col4']
     df.columns = [f'col1_{args.tag}',f'col2_{args.tag}',f'col3_{args.tag}', f'col4_{args.tag}', f'col5_{args.tag}', f'col6_{args.tag}', f'col7_{args.tag}', f'col8_{args.tag}']
@@ -468,8 +548,6 @@ if __name__ == "__main__":
 
     ###################################
     # primer performance part
-
-    
     df_SH, df_IH = get_primer_performance_df(args.input, args.isolates, good_stools, tripod_mapping, oligo_primers)
 
     value_threshold = 10 #read depth threshold
@@ -504,8 +582,6 @@ if __name__ == "__main__":
     SH_below_threshold = (df_SH < value_threshold).mean(axis=1)
     IH_above_threshold = (df_IH >= value_threshold).mean(axis=1)
     above_threshold_indexes = df_SH.index[(SH_below_threshold >= ratio_threshold) & (IH_above_threshold  >= 0.999)]
-    # test purpose only
-    # above_threshold_indexes = df_SH.index[(SH_below_threshold >= ratio_threshold)]
 
     # Step 3: Indexes where both SH and IH are above threshold 99.9% of the time
     SH_above_threshold = (df_SH >= value_threshold).mean(axis=1)
